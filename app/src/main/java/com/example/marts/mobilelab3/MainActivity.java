@@ -1,45 +1,30 @@
 package com.example.marts.mobilelab3;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.AudioAttributes;
-import android.media.AudioManager;
-import android.media.SoundPool;
-import android.os.PowerManager;
 import android.os.Vibrator;
-import android.provider.MediaStore;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.Display;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener{
 
-    private String TAG = "TAG"; //To be replaced later
-
+    //Sensor
     private SensorManager sensorManager;
-    private Sensor accelerometer;
+    private Sensor gravitySensor;
 
-    private ImageView frame;
+    //The ball to move around on the screen
     private ImageView ball;
 
+    //The width of the frame
     private int frameWidth;
+    //The height of the frame
     private int frameHeight;
+    //Used to make the ball stay within the frame
     private int radius;
 
 
@@ -49,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
 
         //Gets the frame and the ball
-        frame = findViewById(R.id.frame);
+        ImageView frame = findViewById(R.id.frame);
         ball = findViewById(R.id.ball);
 
         //Sets the height and with of the frame
@@ -59,9 +44,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         radius = 25;
 
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);    //Gets the system sensors
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);  //Selects the accelerometer sensor
+        assert sensorManager != null;
+        gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);  //Selects the gravitySensor sensor
 
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME); //Creates a listener on the sensor
+        sensorManager.registerListener(this, gravitySensor, SensorManager.SENSOR_DELAY_GAME); //Creates a listener on the sensor
         //Set the delay to GAME as that created a less "laggy" experience
 
     }
@@ -76,13 +62,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         float nextX = X + sensorEvent.values[1];
         float nextY = Y + sensorEvent.values[0];
 
-        //LinearLayout.LayoutParams frameMargin = (LinearLayout.LayoutParams) frame.getLayoutParams();
-        ConstraintLayout.LayoutParams frameMargin = (ConstraintLayout.LayoutParams) frame.getLayoutParams();
-
-        float width = frameMargin.width;
-        float height = frameMargin.height;
-
-
         //moves the ball LEFT until it crashes with the border
         if((nextX - radius) >= frameWidth / 2){
             ball.setX(nextX);
@@ -91,66 +70,44 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             ball.setX(nextX + 35); //"Bounces" the ball of the frame
         }
         //moves the ball to the TOP until it crashes with the border
-        if((nextY - radius) >= frameHeight / 2){
+        if((nextY - radius) >= (frameHeight / 2) + 20){ //Added "+ 20" to make the ball bounce on the inner edge of the frame
             ball.setY(nextY);
-        }else {
+        }else{
             onFrameHit();
             ball.setY(nextY + 35);
         }
 
-        /*DisplayMetrics displayMetrics = new DisplayMetrics();
+        //Gets the screens height and width
+        DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int dispHeight = displayMetrics.heightPixels;
-        int dispWidth = displayMetrics.widthPixels;
+        int devHeight = displayMetrics.heightPixels;
+        int devWidth = displayMetrics.widthPixels;
 
-        if((nextX + radius) < dispWidth - frameWidth){
-            ball.setX(nextX);
-        }else {
+        //moves the ball to the RIGHT until it crashes with the border
+        //Ignored linter error as the log spam in the console was annoying
+        if ((nextX + radius) > devWidth - (frameWidth / 2) - 60) { //Added "- 60" to make the ball bounce on the frame and not the edge of the screen
             onFrameHit();
-        }
-        /*if((nextY) <= radius ){
-            ball.setY(nextY);
-        }else {
-            onFrameHit();
+            ball.setX(nextX - 35);
         }
 
-        /*
-
-        if(nextX >= width / 2 - radius){
-            ball.setX(nextX);
-        }else {
+        //moves the ball to the BOTTOM until it crashes with the border
+        //Ignored linter error as the log spam in the console was annoying
+        if ((nextY + radius) > devHeight - (frameHeight / 2) - 320) {  //Added "- 320" to make the ball bounce on the frame and off the edge of the screen
             onFrameHit();
+            ball.setY(nextY - 35);
         }
-
-
-
-        if(nextY >= frameHeight / 2 - radius){
-            ball.setY(nextY);
-        }else {
-            onFrameHit();
-        }
-
-
-
-        /*
-        if(!onFrameHit()){
-            //Inspired by http://prod3.imt.hig.no/maciejp/imt3673-lab3
-            ball.setY(Y + sensorEvent.values[0]); //sensor value [0] = Y [1] = X
-            ball.setX(X + sensorEvent.values[1]);
-        }*/
 
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
-
+        //NOT USED, but implemented as SensorEventListener needs it
     }
 
    @Override
     protected void onResume() {
         super.onResume();
-        //sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL); //Sets a listener on the accelerometer
-       sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME); //Creates a listener on the sensor
+       sensorManager.registerListener(this, gravitySensor, SensorManager.SENSOR_DELAY_GAME); //Creates a listener on the sensor
     }
 
     @Override
@@ -159,17 +116,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager.unregisterListener(this); //Removes the listener when the app is not in use
     }
 
+    /**
+     * Sets of multiple effects when the ball hits the edge of the frame
+     */
     private void onFrameHit(){
-
+        //Vibrator
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(500);
+        assert vibrator != null;
+        vibrator.vibrate(400);
 
-        int soundId;
-        SoundPool soundPool;
-        //AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_GAME).build();
-        soundPool = new SoundPool.Builder().setMaxStreams(1).build();
-        soundId = soundPool.load(this, R.raw.bing, 1);
-        soundPool.play(soundId,1,1,1, 0, 1);
+        //Sound
 
     }
 }
