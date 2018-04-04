@@ -5,6 +5,9 @@ With this app the user can tilt their mobile-phone in any direction and a (on sc
 
 The app moves the ball using the gravity sensor.
 
+##### Other
+There is one linter error tied to Google indexing. I have ignored this error since I have no intention of makin this app more accessable through Google Search.
+
 ## Project description
 
 ### Lab 3: Sensors
