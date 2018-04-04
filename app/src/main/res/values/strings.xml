@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">mobilelab3</string>
+    <string name="a_ball">A ball</string>
+    <string name="the_frame">The frame</string>
 </resources>

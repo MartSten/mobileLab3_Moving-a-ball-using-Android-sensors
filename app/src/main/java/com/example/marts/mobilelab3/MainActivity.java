@@ -32,6 +32,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     //Used to play a sound when the ball hits the edge of the frame
     private ToneGenerator toneGenerator;
 
+    //Gets the screens height and width
+    DisplayMetrics displayMetrics;
+    private int devHeight;
+    private int devWidth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +56,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //Sets the radius
         radius = 25;
 
-        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);    //Gets the system sensors
+        //Gets the system sensors
+        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         assert sensorManager != null;
-        gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);  //Selects the gravitySensor sensor
+        //Selects the gravitySensor sensor
+        gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
 
-        sensorManager.registerListener(this, gravitySensor, SensorManager.SENSOR_DELAY_GAME); //Creates a listener on the sensor
+        //Gets the screens height and width
+        displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        devHeight = displayMetrics.heightPixels;
+        devWidth = displayMetrics.widthPixels;
+
+        //Creates a listener on the sensor
+        sensorManager.registerListener(this, gravitySensor, SensorManager.SENSOR_DELAY_GAME);
         //Set the delay to GAME as that created a less "laggy" experience
 
     }
@@ -76,30 +89,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             ball.setX(nextX);
         }else {
             onFrameHit();
-            ball.setX(nextX + 35); //"Bounces" the ball of the frame
+            //"Bounces" the ball of the frame
+            ball.setX(nextX + 35);
         }
         //moves the ball to the TOP until it crashes with the border
-        if((nextY - radius) >= (frameHeight / 2) + 20){ //Added "+ 20" to make the ball bounce on the inner edge of the frame
+        //Added "+ 20" to make the ball bounce on the inner edge of the frame
+        if((nextY - radius) >= (frameHeight / 2) + 20){
             ball.setY(nextY);
         }else{
             onFrameHit();
             ball.setY(nextY + 35);
         }
 
-        //Gets the screens height and width
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int devHeight = displayMetrics.heightPixels;
-        int devWidth = displayMetrics.widthPixels;
-
         //moves the ball to the RIGHT until it crashes with the border
-        if ((nextX + radius) > devWidth - (frameWidth / 2) - 60) { //Added "- 60" to make the ball bounce on the frame and not the edge of the screen
+        //Added "- 60" to make the ball bounce on the frame and not the edge of the screen
+        if ((nextX + radius) > devWidth - (frameWidth / 2) - 60) {
             onFrameHit();
             ball.setX(nextX - 35);
         }
 
         //moves the ball to the BOTTOM until it crashes with the border
-        if ((nextY + radius) > devHeight - (frameHeight / 2) - 320) {  //Added "- 320" to make the ball bounce on the frame and off the edge of the screen
+        //Added "- 320" to make the ball bounce on the frame and off the edge of the screen
+        if ((nextY + radius) > devHeight - (frameHeight / 2) - 320) {
             onFrameHit();
             ball.setY(nextY - 35);
         }
@@ -114,13 +125,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
    @Override
     protected void onResume() {
         super.onResume();
-       sensorManager.registerListener(this, gravitySensor, SensorManager.SENSOR_DELAY_GAME); //Creates a listener on the sensor
+       //Creates a listener on the gravity-sensor on resuming the app
+       sensorManager.registerListener(this, gravitySensor, SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        sensorManager.unregisterListener(this); //Removes the listener when the app is not in use
+        //Removes the listener when the app is not in use
+        sensorManager.unregisterListener(this);
     }
 
     /**

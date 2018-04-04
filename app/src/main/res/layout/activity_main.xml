@@ -18,7 +18,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:color/black"
-        />
+        android:contentDescription="@string/the_frame" />
 
     <ImageView
         android:id="@+id/ball"
@@ -29,5 +29,5 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:srcCompat="@android:drawable/radiobutton_off_background"
-        />
+        android:contentDescription="@string/a_ball" />
 </android.support.constraint.ConstraintLayout>
