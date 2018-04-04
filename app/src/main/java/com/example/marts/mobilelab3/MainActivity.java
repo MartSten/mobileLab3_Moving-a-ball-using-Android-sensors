@@ -5,6 +5,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +29,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     //Used to make the ball stay within the frame
     private int radius;
 
+    //Used to play a sound when the ball hits the edge of the frame
+    private ToneGenerator toneGenerator;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +42,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ImageView frame = findViewById(R.id.frame);
         ball = findViewById(R.id.ball);
 
+        //Initiates a new ToneGenerator
+        toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, ToneGenerator.MAX_VOLUME);
+
         //Sets the height and with of the frame
         frameWidth = frame.getWidth();
         frameHeight = frame.getHeight();
 
+        //Sets the radius
         radius = 25;
 
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);    //Gets the system sensors
@@ -84,14 +93,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int devWidth = displayMetrics.widthPixels;
 
         //moves the ball to the RIGHT until it crashes with the border
-        //Ignored linter error as the log spam in the console was annoying
         if ((nextX + radius) > devWidth - (frameWidth / 2) - 60) { //Added "- 60" to make the ball bounce on the frame and not the edge of the screen
             onFrameHit();
             ball.setX(nextX - 35);
         }
 
         //moves the ball to the BOTTOM until it crashes with the border
-        //Ignored linter error as the log spam in the console was annoying
         if ((nextY + radius) > devHeight - (frameHeight / 2) - 320) {  //Added "- 320" to make the ball bounce on the frame and off the edge of the screen
             onFrameHit();
             ball.setY(nextY - 35);
@@ -126,6 +133,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         vibrator.vibrate(400);
 
         //Sound
-
+        toneGenerator.startTone(ToneGenerator.TONE_CDMA_ONE_MIN_BEEP);
     }
 }
